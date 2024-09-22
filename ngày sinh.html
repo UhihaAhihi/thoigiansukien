@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <title>Tính Toán Ngày Sinh</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            text-align: center; 
+            padding: 20px; 
+            margin: 0; 
+            background: linear-gradient(135deg, #74ebd5 0%, #ACB6E5 100%); 
+            color: #333; 
+        }
+        h1 { 
+            font-size: 28px; 
+            color: #007BFF; 
+        }
+        label, input, button { 
+            margin: 10px 0; 
+            padding: 12px; 
+            font-size: 18px; 
+            width: calc(100% - 40px); 
+            max-width: 400px; 
+            border-radius: 5px; 
+        }
+        input, button { 
+            border: 1px solid #ccc; 
+            transition: border-color 0.3s; 
+        }
+        input:focus { 
+            border-color: #007BFF; 
+        }
+        button { 
+            background-color: #007BFF; 
+            color: white; 
+            border: none; 
+            cursor: pointer; 
+        }
+        button:hover { 
+            background-color: #0056b3; 
+            transform: scale(1.05); 
+        }
+        #results { 
+            margin-top: 20px; 
+            text-align: left; 
+            padding: 20px; 
+            background-color: #fff; 
+            border-radius: 5px; 
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 
+            font-size: 18px; 
+            animation: fadeIn 0.5s; 
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @media (min-width: 600px) { 
+            input, button { 
+                width: auto; 
+            } 
+        }
+        .event-link {
+            margin-top: 20px;
+            display: inline-block;
+            padding: 12px 20px;
+            background-color: #FFC107;
+            color: white;
+            border-radius: 5px;
+            text-decoration: none;
+        }
+        .event-link:hover {
+            background-color: #FFB300;
+        }
+    </style>
+</head>
+<body>
+    <h1>Tính Toán Chỉ Số Ngày Sinh</h1>
+    <label for="dob">Nhập ngày sinh (dd/mm/yyyy):</label>
+    <input type="date" id="dob">
+    <button onclick="calculateStats()">Tính Toán</button>
+    <div id="results"></div>
+
+    <a href="events.html" class="event-link">Xem các sự kiện</a>
+
+    <script>
+        function calculateStats() {
+            const dobInput = document.getElementById('dob').value;
+            if (!dobInput) { alert('Vui lòng nhập ngày sinh.'); return; }
+
+            const dob = new Date(dobInput);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); // Đặt giờ, phút, giây về 0 để so sánh chính xác
+
+            const ageInMilliseconds = today - dob;
+            const ageInDays = Math.floor(ageInMilliseconds / (1000 * 60 * 60 * 24));
+            const ageInYears = Math.floor(ageInDays / 365.25);
+            const ageInMonths = Math.floor(ageInYears * 12 + (today.getMonth() - dob.getMonth()) + (today.getFullYear() - dob.getFullYear()) * 12);
+
+            // Sinh nhật gần nhất
+            const lastBirthday = new Date(today.getFullYear(), dob.getMonth(), dob.getDate());
+            if (today < lastBirthday) {
+                lastBirthday.setFullYear(today.getFullYear() - 1);
+            }
+            const daysSinceLastBirthday = Math.floor((today - lastBirthday) / (1000 * 60 * 60 * 24));
+
+            // Sinh nhật tiếp theo
+            const nextBirthday = new Date(today.getFullYear(), dob.getMonth(), dob.getDate());
+            if (today >= nextBirthday) {
+                nextBirthday.setFullYear(today.getFullYear() + 1);
+            }
+            const daysUntilNextBirthday = Math.floor((nextBirthday - today) / (1000 * 60 * 60 * 24));
+
+            // Ngày đủ 18 tuổi
+            const eighteenBirthday = new Date(dob.getFullYear() + 18, dob.getMonth(), dob.getDate());
+            const daysUntilEighteen = Math.floor((eighteenBirthday - today) / (1000 * 60 * 60 * 24));
+            const monthsUntilEighteen = Math.floor(daysUntilEighteen / 30.44);
+
+            const zodiacSigns = [
+                { sign: "Ma Kết", start: [12, 22], end: [1, 19] }, { sign: "Bảo Bình", start: [1, 20], end: [2, 18] },
+                { sign: "Song Ngư", start: [2, 19], end: [3, 20] }, { sign: "Bạch Dương", start: [3, 21], end: [4, 19] },
+                { sign: "Kim Ngưu", start: [4, 20], end: [5, 20] }, { sign: "Song Tử", start: [5, 21], end: [6, 20] },
+                { sign: "Cự Giải", start: [6, 21], end: [7, 22] }, { sign: "Sư Tử", start: [7, 23], end: [8, 22] },
+                { sign: "Xử Nữ", start: [8, 23], end: [9, 22] }, { sign: "Thiên Bình", start: [9, 23], end: [10, 22] },
+                { sign: "Bọ Cạp", start: [10, 23], end: [11, 21] }, { sign: "Nhân Mã", start: [11, 22], end: [12, 21] }
+            ];
+            const findZodiacSign = (month, day) => {
+                for (const sign of zodiacSigns) {
+                    if ((month === sign.start[0] && day >= sign.start[1]) || (month === sign.end[0] && day <= sign.end[1])) {
+                        return sign.sign;
+                    }
+                }
+                return "Chưa xác định";
+            };
+            const zodiacSign = findZodiacSign(dob.getMonth() + 1, dob.getDate());
+
+            const suggestions = [
+                "Hãy ra ngoài và tận hưởng thời tiết.", "Đọc một cuốn sách bạn yêu thích.",
+                "Gọi điện cho một người bạn lâu ngày không gặp.", "Dành thời gian cho một sở thích cá nhân.",
+                "Làm ván chơi game.", "Ngủ để hồi phục năng lượng."
+            ];
+            const suggestion = suggestions[Math.floor(Math.random() * suggestions.length)];
+            const dobYear = dob.getFullYear();
+
+            document.getElementById('results').innerHTML = `
+                <h2>Kết Quả:</h2>
+                <p>Số ngày đã sống: ${ageInDays} ngày</p>
+                <p>Số tháng đã sống: ${ageInMonths} tháng</p>
+                <p>Số năm đã sống: ${ageInYears} năm</p>
+                <p>Số ngày kể từ sinh nhật gần nhất: ${daysSinceLastBirthday} ngày</p>
+                <p>Số ngày đến sinh nhật tiếp theo: ${daysUntilNextBirthday} ngày</p>
+                <p>Cung hoàng đạo của bạn: ${zodiacSign}</p>
+                <p>Mệnh: ${dobYear % 10 === 0 ? "Kim" : dobYear % 10 === 1 ? "Mộc" : dobYear % 10 === 2 ? "Thủy" : dobYear % 10 === 3 ? "Hỏa" : "Thổ"}</p>
+                <p>Đủ tuổi lái xe 50cc: ${ageInYears >= 16 ? "Có" : "Chưa"}</p>
+                <p>Đủ tuổi lái xe trên 50cc: ${ageInYears >= 18 ? "Có" : "Chưa"}</p>
+                <p>Đủ tuổi kết hôn: ${ageInYears >= 18 ? "Có" : "Chưa"}</p>
+                <p>Đủ tuổi bị tù: ${ageInYears >= 18 ? "Có" : "Chưa"}</p>
+                <p>Thời gian còn lại để đủ 18 tuổi: ${daysUntilEighteen} ngày (${monthsUntilEighteen} tháng)</p>
+                <p>Gợi ý hôm nay nên làm gì: ${suggestion}</p>
+            `;
+        }
+    </script>
+</body>
+</html>
