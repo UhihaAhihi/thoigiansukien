@@ -9,8 +9,9 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 20px;
-            background-color: #f4f4f4;
-        } 
+            background: linear-gradient(135deg, #74ebd5 0%, #ACB6E5 100%);
+            color: #333;
+        }
         .container {
             max-width: 800px;
             margin: 0 auto;
@@ -53,16 +54,15 @@
         button:hover {
             background-color: #0056b3;
         }
-        .result {
-            margin-top: 20px;
-        }
-        .result div {
-            margin-bottom: 10px;
+        .back-button {
+            margin-bottom: 20px;
+            background-color: #28a745;
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <button class="back-button" onclick="window.location.href='ngày sinh.html'">Quay lại trang Ngày Sinh</button>
         <h1>Tính Thời Gian Đến Các Sự Kiện</h1>
         <button onclick="calculateUpcomingEvents()">Tính Thời Gian</button>
         <ul class="event-list" id="eventList"></ul>
@@ -70,18 +70,18 @@
     <script>
         const events = [
             { name: "Tết Nguyên Đán", date: "2025-01-29" },
-            { name: "Tết Trung Thu(Dưới 14tuoi mới đc nhận quà)", date: "2025-09-7" },
+            { name: "Tết Trung Thu (Dưới 14 tuổi mới đc nhận quà)", date: "2025-09-07" },
             { name: "Tết Đoan Ngọ", date: "2025-05-31" },
             { name: "Ngày Quốc Khánh", date: "2025-09-02" },
             { name: "Ngày Giải Phóng Miền Nam", date: "2025-04-30" },
             { name: "Ngày Nhà Giáo Việt Nam", date: "2024-11-20" },
-            { name: "Ngày Quốc Tế Phụ Nữ(Theo tin đồn 19/11 là ngày qte đàn ong)", date: "2025-03-08" },
-            { name: "Ngày Quốc Tế Lao Động(GV nghỉ dạy, hsinh nghỉ học)", date: "2025-05-01" },
+            { name: "Ngày Quốc Tế Phụ Nữ (Theo tin đồn 19/11 là ngày qte đàn ông)", date: "2025-03-08" },
+            { name: "Ngày Quốc Tế Lao Động (GV nghỉ dạy, HS nghỉ học)", date: "2025-05-01" },
             { name: "Ngày Thương Binh Liệt Sĩ", date: "2025-07-27" },
             { name: "Tết Dương Lịch", date: "2025-01-01" },
             { name: "Lễ Phục Sinh", date: "2025-03-31" },
-            { name: "Ngày Halloween(Ngày hội cosplay)", date: "2024-10-31" },
-            { name: "Ngày Valentine(Nếu có bồ)", date: "2025-02-14" },
+            { name: "Ngày Halloween (Ngày hội cosplay)", date: "2024-10-31" },
+            { name: "Ngày Valentine (Nếu có bồ)", date: "2025-02-14" },
             { name: "Ngày Cá Tháng Tư", date: "2025-04-01" },
             { name: "Lễ Giáng Sinh", date: "2024-12-25" }
         ];
