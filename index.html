@@ -158,9 +158,28 @@
         .event-item.nearest { border-left-color: var(--accent-color); background: rgba(236, 72, 153, 0.03); }
         .event-name { font-weight: 600; font-size: 15px; display: block; margin-bottom: 3px; }
         .event-date { color: var(--text-secondary); font-size: 13px; }
+        
+        .event-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
         .badge-days { background: var(--primary-color); color: white; padding: 4px 10px; border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer; }
         .nearest .badge-days { background: var(--accent-color); }
         .event-details { font-size: 11px; color: var(--text-secondary); margin-top: 3px; text-align: right; }
+
+        .delete-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background 0.2s;
+        }
+        .delete-btn:hover { background: #dc2626; }
 
         /* Ngày Sinh & Pháp Lý */
         .input-group {
@@ -300,7 +319,7 @@
                     <p id="lifeStats"></p>
                 </div>
 
-                <!-- Mốc Tuổi Pháp Lý (Lái xe, đi tù, kết hôn...) -->
+                <!-- Mốc Tuổi Pháp Lý -->
                 <div class="result-card legal-card">
                     <h3><i class="fa-solid fa-gavel"></i> Mốc Tuổi Pháp Lý & Trách Nhiệm</h3>
                     <p id="ageWarning" style="font-weight: 600; margin-bottom: 10px;"></p>
@@ -382,13 +401,13 @@
                 let [month, day] = event.monthDay.split('-');
                 let eventDate = new Date(currentYear, month - 1, day);
                 if (eventDate < today) eventDate.setFullYear(currentYear + 1);
-                return { ...event, eventDate };
+                return { ...event, eventDate, isCustom: false };
             });
 
-            let mappedCustom = custom.map(event => {
+            let mappedCustom = custom.map((event, index) => {
                 let eventDate = new Date(event.date);
                 eventDate.setHours(0,0,0,0);
-                return { name: "📌 " + event.name, eventDate };
+                return { name: "📌 " + event.name, eventDate, isCustom: true, originalIndex: index };
             });
 
             let combined = [...mappedDefaults, ...mappedCustom].map(event => {
@@ -420,14 +439,23 @@
                 const isNearest = index === 0;
                 li.className = `event-item ${isNearest ? 'nearest' : ''}`;
 
+                // Nút xóa dành riêng cho Admin (chỉ hiện với sự kiện do bạn tự thêm)
+                let deleteBtnHtml = '';
+                if (event.isCustom) {
+                    deleteBtnHtml = `<button class="delete-btn" onclick="deleteCustomEvent(${event.originalIndex})" title="Xóa sự kiện này"><i class="fa-solid fa-trash"></i> Xóa</button>`;
+                }
+
                 li.innerHTML = `
                     <div class="event-info">
                         <span class="event-name">${event.name} ${isNearest ? '🔥 (Sắp tới)' : ''}</span>
                         <span class="event-date"><i class="fa-regular fa-calendar"></i> ${event.eventDate.toLocaleDateString('vi-VN')}</span>
                     </div>
-                    <div class="event-countdown">
-                        <span class="badge-days" onclick="triggerFireworks()">${event.daysLeft === 0 ? 'Hôm nay! (Bấm pháo hoa 🎉)' : `${event.daysLeft} ngày nữa`}</span>
-                        <div class="event-details">(${event.weeksLeft} tuần, khoảng ${event.monthsLeft} tháng)</div>
+                    <div class="event-right">
+                        <div class="event-countdown">
+                            <span class="badge-days" onclick="triggerFireworks()">${event.daysLeft === 0 ? 'Hôm nay! (Bấm pháo hoa 🎉)' : `${event.daysLeft} ngày nữa`}</span>
+                            <div class="event-details">(${event.weeksLeft} tuần, khoảng ${event.monthsLeft} tháng)</div>
+                        </div>
+                        ${deleteBtnHtml}
                     </div>
                 `;
                 eventList.appendChild(li);
@@ -447,6 +475,22 @@
             document.getElementById('customName').value = '';
             document.getElementById('customDate').value = '';
             calculateUpcomingEvents();
+        }
+
+        // Tính năng Xóa sự kiện dành cho Admin
+        function deleteCustomEvent(index) {
+            let password = prompt("Nhập mật khẩu Admin để xóa sự kiện (Mật khẩu mặc định: admin):");
+            if (password === null) return; // Bấm hủy
+            
+            if (password === "admin") {
+                let custom = getSavedCustomEvents();
+                custom.splice(index, 1); // Xóa phần tử tại vị trí index
+                localStorage.setItem('myCustomEvents', JSON.stringify(custom));
+                calculateUpcomingEvents();
+                alert("Đã xóa sự kiện thành công! 🗑️");
+            } else {
+                alert("Mật khẩu không đúng! Bạn không có quyền xóa.");
+            }
         }
 
         function startLiveCountdown(nearestEvent) {
@@ -522,7 +566,6 @@
 
             const age = calculateAge(birthDate, today);
 
-            // 1. Thống kê thời gian sống
             const diffTime = Math.abs(today - birthDate);
             const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
             const diffWeeks = Math.floor(diffDays / 7);
@@ -536,7 +579,6 @@
                 🧋 Tiêu thụ khoảng: <b>${milkTea.toLocaleString()}</b> ly trà sữa | 💨 Hít thở: <b>${oxygen.toLocaleString()}</b> m³ oxy.
             `;
 
-            // 2. Mốc Tuổi Pháp Lý (Lái xe, đi tù, kết hôn...)
             document.getElementById('ageWarning').innerText = `Hiện tại bạn đang ở mốc ${age} tuổi. Các quyền hạn & trách nhiệm pháp lý:`;
             
             const legalMilestones = [
@@ -562,7 +604,6 @@
             legalHTML += `<li class="legal-item" style="color:${age >= 18 ? '#10b981' : 'var(--text-secondary)'};"><i class="fa-solid ${age >= 18 ? 'fa-circle-check' : 'fa-circle-xmark'}"></i> ${marriageAgeText}</li>`;
             document.getElementById('legalList').innerHTML = legalHTML;
 
-            // 3. Cung hoàng đạo & Thần số học
             const zodiac = getZodiacSign(day, month);
             const lifePathNumber = calculateNumerology(day, month, year);
 
@@ -572,7 +613,6 @@
                 🔢 <b>Thần số học (Con số chủ đạo): Số ${lifePathNumber}</b>
             `;
 
-            // 4. Độ hợp đôi
             const partner = document.getElementById('partnerSign').value;
             const matchCard = document.getElementById('matchCard');
             if (partner) {
@@ -583,10 +623,9 @@
                 matchCard.style.display = 'none';
             }
 
-            // 5. Bói vui & Tarot
             const fortunes = [
                 "Tướng tinh con mèo lười: Cuộc đời sinh ra để hưởng thụ giấc ngủ ngon, tiền tài có thể chậm đến nhưng đồ ăn ngon không bao giờ trễ hẹn.",
-                "Dự báo thời tiết tâm hồn: Sắp tới trời sẽ mưa ra tiền, nhưng tiếc là ví của bạn đang ủng hộ phong trào 'ví rỗng tinh tế'. Hãy chăm chỉ học tập nhé!",
+                "Dự báo thời tiết tâm hồn: Sắp tới trời sẽ mưa ra tiền, nhưng tiếc là ví của bạn đang ủng hộ phong trào 'ví rỗng tinh tế'!",
                 "Đường tình duyên: Rất sáng sủa, đặc biệt là tình duyên với máy tính và mạng Internet!"
             ];
             document.getElementById('fortuneInfo').innerHTML = fortunes[(year + month + day) % fortunes.length];
