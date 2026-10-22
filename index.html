@@ -92,7 +92,7 @@
         .section-view { display: none; }
         .section-view.active { display: block; animation: fadeIn 0.4s ease-in-out; }
 
-        /* Style cho phần Sự Kiện */
+        /* Sự Kiện */
         .live-countdown-banner {
             background: linear-gradient(135deg, #6366f1 0%, #ec4899 100%);
             color: white;
@@ -162,7 +162,7 @@
         .nearest .badge-days { background: var(--accent-color); }
         .event-details { font-size: 11px; color: var(--text-secondary); margin-top: 3px; text-align: right; }
 
-        /* Style cho phần Ngày Sinh & Bói */
+        /* Ngày Sinh & Pháp Lý */
         .input-group {
             margin-bottom: 20px;
             display: flex;
@@ -200,8 +200,24 @@
             border-left: 5px solid var(--primary-color);
         }
         .result-card h3 { margin-top: 0; color: var(--primary-color); display: flex; align-items: center; gap: 10px; font-size: 16px; }
+        .legal-card { border-left-color: #10b981; background: rgba(16, 185, 129, 0.03); }
+        .legal-card h3 { color: #10b981; }
         .tarot-card { border-left-color: var(--accent-color); background: rgba(236, 72, 153, 0.03); }
         .tarot-card h3 { color: var(--accent-color); }
+
+        .legal-list {
+            list-style: none;
+            padding: 0;
+            margin: 10px 0 0 0;
+            display: grid;
+            gap: 8px;
+        }
+        .legal-item {
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
 
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
@@ -211,11 +227,11 @@
 </head>
 <body>
     <div class="container">
-        <!-- Thanh điều hướng các tab -->
+        <!-- Thanh điều hướng tab -->
         <div class="top-bar">
             <div class="tab-buttons">
                 <button class="btn tab-btn active" onclick="switchTab('events')"><i class="fa-solid fa-calendar-days"></i> Sự Kiện</button>
-                <button class="btn tab-btn" onclick="switchTab('birthday')"><i class="fa-solid fa-wand-magic-sparkles"></i> Ngày Sinh & Bói</button>
+                <button class="btn tab-btn" onclick="switchTab('birthday')"><i class="fa-solid fa-wand-magic-sparkles"></i> Ngày Sinh & Pháp Lý</button>
             </div>
             <button class="btn theme-btn" onclick="toggleTheme()"><i class="fa-solid fa-moon"></i> Giao diện</button>
         </div>
@@ -245,9 +261,9 @@
             <ul class="event-list" id="eventList"></ul>
         </div>
 
-        <!-- TAB 2: NGÀY SINH & BÓI VUI -->
+        <!-- TAB 2: NGÀY SINH & PHÁP LÝ & BÓI VUI -->
         <div id="birthdaySection" class="section-view">
-            <h1>Khám Phá Ngày Sinh & Coi Bói Vui</h1>
+            <h1>Khám Phá Ngày Sinh & Mốc Pháp Lý</h1>
             
             <div class="input-group">
                 <label for="dobInput">Ngày sinh của bạn (DD/MM/YYYY):</label>
@@ -275,29 +291,41 @@
                 </div>
             </div>
             
-            <button class="btn main-btn" onclick="analyzeBirthdate()"><i class="fa-solid fa-crystal-ball"></i> Khám Phá Ngay</button>
+            <button class="btn main-btn" onclick="analyzeBirthdate()"><i class="fa-solid fa-scale-balanced"></i> Khám Phá Ngay</button>
             
             <div class="result-section" id="resultSection" style="display:none;">
+                <!-- Thời gian sống -->
                 <div class="result-card">
                     <h3><i class="fa-solid fa-clock"></i> Thời Gian Sống & Chỉ Số Vui Nhộn</h3>
                     <p id="lifeStats"></p>
                 </div>
 
+                <!-- Mốc Tuổi Pháp Lý (Lái xe, đi tù, kết hôn...) -->
+                <div class="result-card legal-card">
+                    <h3><i class="fa-solid fa-gavel"></i> Mốc Tuổi Pháp Lý & Trách Nhiệm</h3>
+                    <p id="ageWarning" style="font-weight: 600; margin-bottom: 10px;"></p>
+                    <ul class="legal-list" id="legalList"></ul>
+                </div>
+
+                <!-- Cung hoàng đạo & Thần số học -->
                 <div class="result-card">
                     <h3><i class="fa-solid fa-star"></i> Cung Hoàng Đạo & Thần Số Học</h3>
                     <p id="zodiacInfo"></p>
                 </div>
 
+                <!-- Tỷ lệ hợp đôi -->
                 <div class="result-card" id="matchCard" style="display:none;">
                     <h3><i class="fa-solid fa-heart-pulse"></i> Tỷ Lệ Hợp Đôi</h3>
                     <p id="matchInfo"></p>
                 </div>
 
+                <!-- Coi bói vui -->
                 <div class="result-card">
                     <h3><i class="fa-solid fa-face-smile-beam"></i> Góc Coi Bói Vui (Tử Vi Cười)</h3>
                     <p id="fortuneInfo"></p>
                 </div>
 
+                <!-- Tarot -->
                 <div class="result-card tarot-card">
                     <h3><i class="fa-solid fa-hat-wizard"></i> Lá Bài Tarot Hôm Nay</h3>
                     <p id="tarotInfo"></p>
@@ -309,7 +337,6 @@
     </div>
 
     <script>
-        // Chuyển tab
         function switchTab(tab) {
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.querySelectorAll('.section-view').forEach(s => s.classList.remove('active'));
@@ -322,7 +349,7 @@
             }
         }
 
-        // Logic Sự Kiện
+        // Sự Kiện
         const defaultEvents = [
             { name: "Tết Nguyên Đán", monthDay: "01-29" },
             { name: "Tết Trung Thu (Dưới 14 tuổi mới đc nhận quà)", monthDay: "10-06" },
@@ -456,7 +483,7 @@
             renderEvents(filtered);
         }
 
-        // Logic Ngày Sinh & Bói
+        // Ngày Sinh, Tuổi Pháp Lý & Bói
         const dobInput = document.getElementById('dobInput');
         dobInput.addEventListener('input', function (e) {
             let value = e.target.value.replace(/\D/g, '');
@@ -464,6 +491,15 @@
             else if (value.length > 4) value = value.slice(0, 2) + '/' + value.slice(2, 4) + '/' + value.slice(4, 8);
             e.target.value = value;
         });
+
+        function calculateAge(birthDate, today) {
+            let age = today.getFullYear() - birthDate.getFullYear();
+            let m = today.getMonth() - birthDate.getMonth();
+            if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
+            }
+            return age;
+        }
 
         function analyzeBirthdate() {
             const val = dobInput.value;
@@ -484,46 +520,80 @@
                 return;
             }
 
+            const age = calculateAge(birthDate, today);
+
+            // 1. Thống kê thời gian sống
             const diffTime = Math.abs(today - birthDate);
             const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
             const diffWeeks = Math.floor(diffDays / 7);
+            const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
             const milkTea = Math.floor(diffDays / 4);
             const oxygen = Math.floor(diffDays * 11);
 
             document.getElementById('lifeStats').innerHTML = `
-                ✨ Đã sống: <b>${diffDays.toLocaleString()}</b> ngày (${diffWeeks.toLocaleString()} tuần).<br>
-                🧋 Đã tiêu thụ khoảng: <b>${milkTea.toLocaleString()}</b> ly trà sữa.<br>
-                💨 Đã hít thở khoảng: <b>${oxygen.toLocaleString()}</b> m³ oxy.
+                Bạn hiện tại tròn <b>${age} tuổi</b>.<br>
+                ✨ Đã sống: <b>${diffDays.toLocaleString()}</b> ngày (khoảng <b>${diffWeeks.toLocaleString()}</b> tuần hay <b>${diffHours.toLocaleString()}</b> giờ).<br>
+                🧋 Tiêu thụ khoảng: <b>${milkTea.toLocaleString()}</b> ly trà sữa | 💨 Hít thở: <b>${oxygen.toLocaleString()}</b> m³ oxy.
             `;
 
+            // 2. Mốc Tuổi Pháp Lý (Lái xe, đi tù, kết hôn...)
+            document.getElementById('ageWarning').innerText = `Hiện tại bạn đang ở mốc ${age} tuổi. Các quyền hạn & trách nhiệm pháp lý:`;
+            
+            const legalMilestones = [
+                { minAge: 14, text: "⚖️ <b>Chịu trách nhiệm hình sự:</b> Từ đủ 14 đến dưới 16 tuổi chỉ chịu trách nhiệm về tội rất nghiêm trọng hoặc đặc biệt nghiêm trọng." },
+                { minAge: 16, text: "⚖️ <b>Chịu trách nhiệm hình sự toàn diện hơn:</b> Phải chịu trách nhiệm hình sự về mọi tội phạm do mình gây ra." },
+                { minAge: 16, text: "🛵 <b>Được lái xe gắn máy:</b> Được phép điều khiển xe máy có dung tích xi-lanh dưới 50cc." },
+                { minAge: 18, text: "🎂 <b>Đủ tuổi trưởng thành (Công dân toàn diện):</b><br>&nbsp;&nbsp;• 🚗 Được thi bằng lái xe A1, B1, B2.<br>&nbsp;&nbsp;• 🗳️ Được tham gia bầu cử, chịu trách nhiệm dân sự và hình sự đầy đủ." },
+                { minAge: 18, text: "🍺 <b>Mua bán & sử dụng:</b> Được phép mua bán thuốc lá, sử dụng rượu bia theo quy định." }
+            ];
+
+            let marriageAgeText = (age >= 18) ? "💍 <b>Độ tuổi kết hôn (Nữ):</b> Đã đủ điều kiện kết hôn theo luật pháp." : "💍 <b>Độ tuổi kết hôn (Nữ):</b> Chưa đủ tuổi kết hôn (Yêu cầu Nữ từ đủ 18, Nam từ đủ 20).";
+            if (age >= 20) marriageAgeText = "💍 <b>Độ tuổi kết hôn:</b> Cả Nam và Nữ đều đã hoàn toàn đủ điều kiện kết hôn!";
+
+            let legalHTML = '';
+            legalMilestones.forEach(m => {
+                if (age >= m.minAge) {
+                    legalHTML += `<li class="legal-item" style="color:var(--text-color);"><i class="fa-solid fa-circle-check" style="color:#10b981;"></i> ${m.text}</li>`;
+                } else {
+                    let diffYears = m.minAge - age;
+                    legalHTML += `<li class="legal-item" style="color:var(--text-secondary); opacity:0.7;"><i class="fa-solid fa-circle-xmark" style="color:#ef4444;"></i> <span style="text-decoration:line-through;">${m.text.split(':')[0]}</span> (Còn cách <b>${diffYears} năm</b> nữa mới mở khóa!)</li>`;
+                }
+            });
+            legalHTML += `<li class="legal-item" style="color:${age >= 18 ? '#10b981' : 'var(--text-secondary)'};"><i class="fa-solid ${age >= 18 ? 'fa-circle-check' : 'fa-circle-xmark'}"></i> ${marriageAgeText}</li>`;
+            document.getElementById('legalList').innerHTML = legalHTML;
+
+            // 3. Cung hoàng đạo & Thần số học
             const zodiac = getZodiacSign(day, month);
             const lifePathNumber = calculateNumerology(day, month, year);
 
             document.getElementById('zodiacInfo').innerHTML = `
-                Cung: <b>${zodiac.name}</b> (${zodiac.symbol}) - ${zodiac.trait}<br>
+                Cung của bạn là: <b>${zodiac.name}</b> (${zodiac.symbol})<br>
+                <em>Đặc điểm:</em> ${zodiac.trait}<br>
                 🔢 <b>Thần số học (Con số chủ đạo): Số ${lifePathNumber}</b>
             `;
 
+            // 4. Độ hợp đôi
             const partner = document.getElementById('partnerSign').value;
             const matchCard = document.getElementById('matchCard');
             if (partner) {
                 matchCard.style.display = 'block';
                 const score = Math.floor((Math.abs(zodiac.name.length * partner.length * year) % 51) + 50);
-                document.getElementById('matchInfo').innerHTML = `Độ tương hợp giữa <b>${zodiac.name}</b> và <b>${partner}</b> đạt: <span style="color:var(--accent-color); font-size:18px; font-weight:bold;">${score}%</span>. Hai bạn đích thị là mảnh ghép hoàn hảo!`;
+                document.getElementById('matchInfo').innerHTML = `Độ tương hợp giữa <b>${zodiac.name}</b> và <b>${partner}</b> đạt: <span style="color:var(--accent-color); font-size:18px; font-weight:bold;">${score}%</span>.`;
             } else {
                 matchCard.style.display = 'none';
             }
 
+            // 5. Bói vui & Tarot
             const fortunes = [
-                "Tướng tinh con mèo lười: Cuộc đời sinh ra để hưởng thụ giấc ngủ ngon, tiền tài chậm đến nhưng đồ ăn ngon không bao giờ trễ hẹn.",
-                "Dự báo thời tiết tâm hồn: Sắp tới trời sẽ mưa ra tiền, nhưng ví của bạn đang ủng hộ phong trào 'ví rỗng tinh tế'!",
+                "Tướng tinh con mèo lười: Cuộc đời sinh ra để hưởng thụ giấc ngủ ngon, tiền tài có thể chậm đến nhưng đồ ăn ngon không bao giờ trễ hẹn.",
+                "Dự báo thời tiết tâm hồn: Sắp tới trời sẽ mưa ra tiền, nhưng tiếc là ví của bạn đang ủng hộ phong trào 'ví rỗng tinh tế'. Hãy chăm chỉ học tập nhé!",
                 "Đường tình duyên: Rất sáng sủa, đặc biệt là tình duyên với máy tính và mạng Internet!"
             ];
             document.getElementById('fortuneInfo').innerHTML = fortunes[(year + month + day) % fortunes.length];
 
             const tarotCards = [
                 "<b>The Fool (Kẻ Khờ - Ngược):</b> Trước khi làm gì nhớ suy nghĩ 3 giây thay vì lao đầu vào chọn bừa đáp án trắc nghiệm.",
-                "<b>The Magician (Pháp Sư - Xuôi):</b> Bạn đang có đầy đủ năng lực để làm chủ tình thế. Hôm nay làm gì cũng thuận lợi!",
+                "<b>The Magician (Pháp Sư - Xuôi):</b> Bạn đang có đầy đủ năng lực để làm chủ tình thế. Hôm nay làm gì cũng sẽ thuận lợi!",
                 "<b>The Wheel of Fortune (Bánh Xe Vận Mệnh):</b> Vận may đang xoay chuyển về phía bạn. Làm bài kiểm tra chắc chắn trúng tủ!"
             ];
             document.getElementById('tarotInfo').innerHTML = tarotCards[(year * month * day) % tarotCards.length];
